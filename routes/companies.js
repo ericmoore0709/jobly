@@ -52,12 +52,31 @@ router.post("/", ensureLoggedIn, async function (req, res, next) {
 
 router.get("/", async function (req, res, next) {
   try {
-    const companies = await Company.findAll();
+    const q = req.query;
+    if (q.minEmployees !== undefined) q.minEmployees = +q.minEmployees;
+    if (q.maxEmployees !== undefined) q.maxEmployees = +q.maxEmployees;
+
+    if (q.minEmployees !== undefined && q.maxEmployees !== undefined) {
+      if (q.minEmployees > q.maxEmployees) {
+        throw new BadRequestError("Minimum employees cannot be greater than maximum employees");
+      }
+    }
+
+    // Ensure no inappropriate fields are in the query
+    const allowedFields = ["name", "minEmployees", "maxEmployees"];
+    for (let key in q) {
+      if (!allowedFields.includes(key)) {
+        throw new BadRequestError(`Filtering by '${key}' is not allowed`);
+      }
+    }
+
+    const companies = await Company.findFiltered(q);
     return res.json({ companies });
   } catch (err) {
     return next(err);
   }
 });
+
 
 /** GET /[handle]  =>  { company }
  *
