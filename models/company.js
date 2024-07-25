@@ -159,7 +159,7 @@ class Company {
 
     const { name, minEmployees, maxEmployees } = filters;
 
-    // For each possible filter, add to whereExpressions and queryValues
+    // For each existing filter, add clause to whereExpressions and variable value to queryValues
     if (minEmployees !== undefined) {
       queryValues.push(minEmployees);
       whereExpressions.push(`num_employees >= $${queryValues.length}`);
@@ -175,10 +175,12 @@ class Company {
       whereExpressions.push(`name ILIKE $${queryValues.length}`);
     }
 
+    // if filters were added, append where clauses to query string 
     if (whereExpressions.length > 0) {
       query += " WHERE " + whereExpressions.join(" AND ");
     }
 
+    // order by name because that's what the findAll did.
     query += " ORDER BY name";
     const companiesRes = await db.query(query, queryValues);
     return companiesRes.rows;

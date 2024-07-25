@@ -52,11 +52,17 @@ router.post("/", ensureLoggedIn, async function (req, res, next) {
 
 router.get("/", async function (req, res, next) {
   try {
+
     const q = req.query;
+
+    // if either variable is defined, cast variable to number
     if (q.minEmployees !== undefined) q.minEmployees = +q.minEmployees;
     if (q.maxEmployees !== undefined) q.maxEmployees = +q.maxEmployees;
 
+    // if both are defined...
     if (q.minEmployees !== undefined && q.maxEmployees !== undefined) {
+
+      // throw error if min > max
       if (q.minEmployees > q.maxEmployees) {
         throw new BadRequestError("Minimum employees cannot be greater than maximum employees");
       }
@@ -70,6 +76,7 @@ router.get("/", async function (req, res, next) {
       }
     }
 
+    // query the database
     const companies = await Company.findFiltered(q);
     return res.json({ companies });
   } catch (err) {
