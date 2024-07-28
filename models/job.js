@@ -75,7 +75,7 @@ class Job {
      * This is a "partial update" --- it's fine if data doesn't contain all the
      * fields; this only changes provided ones.
      *
-     * Data can include: {// title, salary, equity, company_handle}
+     * Data can include: { title, salary, equity, company_handle}
      *
      * Returns {title, salary, equity, companyHandle}
      *
