@@ -319,3 +319,34 @@ describe("findFiltered", function () {
         ]);
     });
 });
+
+describe('findByCompanyHandle', function () {
+    test('works: existing company handle and non-empty list', async function () {
+        let companyHandle = 'c1';
+        let jobs = await Job.findByCompanyHandle(companyHandle);
+
+        expect(jobs).toEqual([
+            {
+                id: expect.any(Number),
+                title: "title1",
+                salary: 50000,
+                equity: '0',
+                companyHandle: "c1",
+            },
+            {
+                id: expect.any(Number),
+                title: "title2",
+                salary: 60000,
+                equity: '0.04',
+                companyHandle: "c1",
+            },
+        ]);
+    })
+
+    test('works: non-existent company handle', async function () {
+        let companyHandle = 'nope';
+        let jobs = await Job.findByCompanyHandle(companyHandle);
+
+        expect(jobs).toEqual([]);
+    })
+})
