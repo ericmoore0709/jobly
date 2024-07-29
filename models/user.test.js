@@ -7,6 +7,7 @@ const {
 } = require("../expressError");
 const db = require("../db.js");
 const User = require("./user.js");
+const Job = require("./job.js");
 const {
   commonBeforeAll,
   commonBeforeEach,
@@ -215,7 +216,7 @@ describe("remove", function () {
   test("works", async function () {
     await User.remove("u1");
     const res = await db.query(
-        "SELECT * FROM users WHERE username='u1'");
+      "SELECT * FROM users WHERE username='u1'");
     expect(res.rows.length).toEqual(0);
   });
 
@@ -228,3 +229,17 @@ describe("remove", function () {
     }
   });
 });
+
+describe("applyToJob", function () {
+  test("works", async function () {
+    const username = 'u1';
+    const jobs = await Job.findByCompanyHandle('c1');
+    const jobId = jobs[0].id;
+    await User.applyToJob(username, jobId);
+
+    const res = await db.query('SELECT * FROM applications WHERE username = $1 AND job_id = $2', [username, jobId]);
+
+    expect(res.rows.length).toEqual(1);
+    expect(res.rows[0]['job_id']).toEqual(jobId);
+  });
+})
