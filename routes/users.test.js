@@ -14,6 +14,7 @@ const {
   u1Token,
   u2Token,
 } = require("./_testCommon");
+const Job = require("../models/job.js");
 
 beforeAll(commonBeforeAll);
 beforeEach(commonBeforeEach);
@@ -374,4 +375,44 @@ describe("DELETE /users/:username", function () {
       .set("authorization", `Bearer ${u1Token}`);
     expect(resp.statusCode).toEqual(404);
   });
+});
+
+/************************************** POST /users/:username/jobs/:id */
+describe("POST /users/:username/jobs/:id", function () {
+  test("works for admin", async function () {
+
+    let username = 'u2';
+    let jobs = await Job.findAll();
+    let jobId = jobs[jobs.length - 1].id;
+
+    const resp = await request(app)
+      .post(`/users/${username}/jobs/${jobId}`)
+      .set("authorization", `Bearer ${u1Token}`);
+    expect(resp.body).toEqual({ applied: jobId });
+  });
+
+  test("works for username", async function () {
+
+    let username = 'u2';
+    let jobs = await Job.findAll();
+    let jobId = jobs[jobs.length - 1].id;
+
+    const resp = await request(app)
+      .post(`/users/${username}/jobs/${jobId}`)
+      .set("authorization", `Bearer ${u2Token}`);
+    expect(resp.body).toEqual({ applied: jobId });
+  });
+
+  test("not works for other user", async function () {
+
+    let username = 'u3';
+    let jobs = await Job.findAll();
+    let jobId = jobs[jobs.length - 1].id;
+
+    const resp = await request(app)
+      .post(`/users/${username}/jobs/${jobId}`)
+      .set("authorization", `Bearer ${u2Token}`);
+    expect(resp.statusCode).toEqual(401);
+  });
+
 });

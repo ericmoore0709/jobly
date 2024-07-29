@@ -242,4 +242,21 @@ describe("applyToJob", function () {
     expect(res.rows.length).toEqual(1);
     expect(res.rows[0]['job_id']).toEqual(jobId);
   });
+  test("handle duplicate application", async function () {
+    const username = 'u1';
+    const jobs = await Job.findAll();
+    const jobId = jobs[0].id;
+    await User.applyToJob(username, jobId);
+    await expect(User.applyToJob(username, jobId)).rejects.toThrow(BadRequestError);
+  });
+})
+
+describe('getAppliedJobs', function () {
+  test('works', async function () {
+    const username = 'u2';
+    const jobs = await User.getAppliedJobs(username);
+
+    expect(jobs.length).toBeGreaterThan(0);
+    expect(jobs[0]).toEqual(expect.any(Number));
+  })
 })

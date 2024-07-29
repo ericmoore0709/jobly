@@ -212,17 +212,37 @@ class User {
    * @returns the job ID if successful
    * 
    * @throws {NotFoundError} if job ID is not found in database
+   * @throws {BadRequestError} if application already exists
    */
   static async applyToJob(username, jobId) {
-
-    let result = await db.query(
-      `INSERT INTO applications (username, job_id)
+    try {
+      let result = await db.query(
+        `INSERT INTO applications (username, job_id)
        VALUES ($1, $2)
        RETURNING job_id`,
-      [username, jobId]
-    );
-    return result.rows[0];
+        [username, jobId]
+      );
+      return result.rows[0].job_id;
+    } catch (err) {
+      if (err.message.includes(`duplicate key value violates unique constraint "applications_pkey"`))
+        throw new BadRequestError('Application already exists.');
+    }
   }
+
+  /**
+   * Retrieves a list of job IDs from jobs applied to by the user. 
+   * @param {string} username the user's username
+   * @returns a list of {Number} job IDs
+   */
+  static async getAppliedJobs(username) {
+    let result = await db.query(
+      `SELECT job_id FROM applications WHERE username = $1`, [username]
+    );
+
+    let jobIds = result.rows.map(x => x.job_id);
+    return jobIds;
+  }
+
 }
 
 module.exports = User;
